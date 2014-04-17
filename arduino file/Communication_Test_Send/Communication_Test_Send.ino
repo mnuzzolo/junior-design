@@ -38,10 +38,18 @@ void setup() {
 void loop() {
   //delay(SAMPLE_TIME/5);
  
- delay(500);
+ delay(1000);
  
  //int message[4] = {1 0 1 0};
  sendMessage(1);
+ 
+ delay(1000);
+ 
+ sendMessage(2);
+ 
+ delay(1000);
+ 
+ sendMessage(3);
  
   /*if( messageRecievedFlag ) {
     Serial.print("Message recieved: ");
@@ -186,6 +194,28 @@ void sendMessage(int message) {
   if( message == 1 ) {
     for(int i = 0; i<ARRAY_SIZE; i++) {
       if( colissionMsg[i] == 1 ) {
+        digitalWrite(DATA_PIN, HIGH);
+      }
+      else {
+        digitalWrite(DATA_PIN, LOW); 
+      }
+      delayMicroseconds(SAMPLE_TIME);
+    }
+  }
+  else if( message == 2 ) {
+    for(int i = 0; i<ARRAY_SIZE; i++) {
+      if( foundBlueMsg[i] == 1 ) {
+        digitalWrite(DATA_PIN, HIGH);
+      }
+      else {
+        digitalWrite(DATA_PIN, LOW); 
+      }
+      delayMicroseconds(SAMPLE_TIME);
+    }
+  }
+  else if( message == 3 ) {
+    for(int i = 0; i<ARRAY_SIZE; i++) {
+      if( foundRedMsg[i] == 1 ) {
         digitalWrite(DATA_PIN, HIGH);
       }
       else {
