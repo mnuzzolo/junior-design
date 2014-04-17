@@ -64,4 +64,3 @@ void stop_motor(int time){
     digitalWrite(9, LOW);//enable driver 2 
     delay(time);
 }
-
