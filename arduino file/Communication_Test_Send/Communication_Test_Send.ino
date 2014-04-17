@@ -2,7 +2,7 @@ const int ARRAY_SIZE = 4;
 const int SAMPLE_TIME = 950;
 
 const int DATA_PIN = 12;
-const int RECIEVER_PIN = 18;
+const int RECIEVER_PIN = 21;
 
 int sample_array[ARRAY_SIZE];
 
@@ -18,8 +18,6 @@ int lastMessage[ARRAY_SIZE];
 // flags
 int messageRecievedFlag = 0;
 
-int counter = 0;
-int counter2 = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -27,7 +25,7 @@ void setup() {
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
   pinMode(2, OUTPUT);
-  attachInterrupt(5, getMessage, RISING);
+  attachInterrupt(2, getMessage, RISING);
   
   setArrays();
   clearArray(sample_array);
@@ -40,34 +38,23 @@ void setup() {
 void loop() {
   //delay(SAMPLE_TIME/5);
  
- //delay(3000);
+ delay(500);
  
  //int message[4] = {1 0 1 0};
- //sendMessage(1);
- delay(1000);
-  
-  if( messageRecievedFlag ) {
+ sendMessage(1);
+ 
+  /*if( messageRecievedFlag ) {
     Serial.print("Message recieved: ");
-    messageRecievedFlag = 0; 
-    Serial.print(sample_array[0]);
-    Serial.print(sample_array[1]);
-    Serial.print(sample_array[2]);
-    Serial.println(sample_array[3]); 
+    //messageRecievedFlag = 0;
   }
-  /*else if( counter > 32760  ) {
-    if(counter2 > 5) {
-      Serial.print("Invalid message: ");
-      Serial.print(sample_array[0]);
-      Serial.print(sample_array[1]);
-      Serial.print(sample_array[2]);
-      Serial.println(sample_array[3]); 
-    }
-    counter2++;
-    counter = -32760;
-  }*/
+  else {//if( invalidMessageFlag ) {
+    Serial.print("Invalid message: ");
+  }
   
-  counter++; 
-  
+  Serial.print(sample_array[0]);
+  Serial.print(sample_array[1]);
+  Serial.print(sample_array[2]);
+  Serial.println(sample_array[3]);*/ 
 }
 
 void getMessage() {
@@ -140,7 +127,7 @@ void decodeMessage() {
  else if( compareArrays(sample_array, invalidMsg) ) {
    // Serial.println("Communication failed. Resending message...");
    // give other bot time to prepare
-   //delayMicroseconds(SAMPLE_TIME);
+   delayMicroseconds(SAMPLE_TIME);
    //sendMessage(lastMessage);
  } 
  else {
@@ -151,9 +138,9 @@ void decodeMessage() {
   Serial.println(sample_array[3]);*/
   
   // give other bot time to prepare
-  //delayMicroseconds(SAMPLE_TIME);
-  //sendMessage(5); 
-  //messageRecievedFlag = 0;
+  delayMicroseconds(SAMPLE_TIME);
+  sendMessage(5); 
+  messageRecievedFlag = 0;
  }
  
  //clearArray(sample_array);
@@ -194,23 +181,24 @@ void setArrays() {
 }
 
 void sendMessage(int message) {
-  //Serial.println("Sending message...");
+  digitalWrite(DATA_PIN, LOW); 
+  Serial.println("Sending message...");
   if( message == 1 ) {
     for(int i = 0; i<ARRAY_SIZE; i++) {
       if( colissionMsg[i] == 1 ) {
-        analogWrite(DATA_PIN, HIGH);
+        digitalWrite(DATA_PIN, HIGH);
       }
       else {
-        analogWrite(DATA_PIN, LOW); 
+        digitalWrite(DATA_PIN, LOW); 
       }
       delayMicroseconds(SAMPLE_TIME);
     }
   }
-  
-  //if( message != 5) {
+  digitalWrite(DATA_PIN, LOW); 
+  /*if( message != 5) {
     // set the last message array
     //copyArrays(messageArr, lastMessage);
-  //}
+  }*/
 }  
 
 // overwrites arr2 with arr1
