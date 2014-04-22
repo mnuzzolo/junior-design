@@ -15,6 +15,8 @@ int invalidMsg[ARRAY_SIZE];
 
 int lastMessage[ARRAY_SIZE];
 
+int lastInterrupt = 0;
+
 // flags
 int messageRecievedFlag = 0;
 
@@ -44,7 +46,6 @@ void loop() {
  
  //int message[4] = {1 0 1 0};
  //sendMessage(1);
- delay(1000);
   
   if( messageRecievedFlag ) {
     Serial.print("Message recieved: ");
@@ -72,6 +73,9 @@ void loop() {
 
 void getMessage() {
   //Serial.println("Hit on rising");
+  
+  if( millis() - lastInterrupt > 50) {
+    lastInterrupt = millis();
   digitalWrite(2, HIGH);
   detachInterrupt(2);
   noInterrupts();
@@ -84,7 +88,7 @@ void getMessage() {
   for(int i = 0; i < ARRAY_SIZE; i++) {
    delayMicroseconds(SAMPLE_TIME/2);
    // this should read in the middle of a bit high/low 
-   if (digitalRead(21) == HIGH)
+   if (digitalRead(RECIEVER_PIN) == HIGH)
      sample_array[i] = 1;
    else { 
      sample_array[i] = 0;
@@ -101,6 +105,7 @@ void getMessage() {
   interrupts();
   attachInterrupt(2, getMessage, RISING);
   digitalWrite(2, LOW);
+  }
 }
 
 void clearArray(int array []) {

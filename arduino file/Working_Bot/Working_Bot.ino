@@ -4,6 +4,21 @@ int lastInterrupt = 0;
 
 int colissionFlag = 0;
 
+// GLOBALS from color recognition
+int lastR_read = 1023;
+int currR_read = 0;
+int lastB_read = 1023;
+int currB_read = 0;
+
+int blue_change = 0;
+int red_change = 0; 
+
+int on_blue = false;
+int on_red = false;
+
+int lost_blue = false;
+int lost_red = false;
+
 void setup() {
   Serial.begin(9600);
   // setup LEDs
@@ -30,22 +45,66 @@ void setup() {
   pinMode(51, INPUT);
   pinMode(52, INPUT);
   pinMode(53, INPUT);
-  //setup collision sensor
+  
+  //setup collision sensor (debugging)
   pinMode(A8, INPUT);
+  
+  // setup sensor
+  pinMode(A0, INPUT);
+  pinMode(28, OUTPUT); // blue LED out
+  pinMode(30, OUTPUT); // red LED out
 
+  // get first values for red/blue
+  LED_check();
   forward(0);
 }
 
-void loop() {
-  //delay(100);
-  //Serial.println(analogRead(A8));
+// main loop
+void loop(){
+  
   if(colissionFlag) {
-    Serial.println(colissionFlag);
     reverse(300);
     left(800);
     stop_motor(0);
     colissionFlag = 0;
   }
+  
+  LED_check();
+  
+  if(on_blue)
+  {
+     while(on_blue) 
+     {
+        LED_check();
+        forward(0); 
+     }
+     if(lost_blue)
+     {
+        LED_check();
+        reverse(350);
+        stop_motor(0);
+        
+        delay(500);
+        
+        if(sweep_find() == true)
+        {
+          Serial.println("***SUCCESSFUL SWEEP***");
+          lost_blue = false;
+          start_motor();
+        }
+        else {
+          stop_motor(0);
+        }
+        
+     }
+  }
+  
+  if(on_red)
+  {
+     right(1000); 
+     stop_motor(0);
+  }
+  
 }
 
 void hasColission() {  

@@ -1,5 +1,5 @@
 const int ARRAY_SIZE = 4;
-const int SAMPLE_TIME = 950;
+const int SAMPLE_TIME = 2000;
 
 const int DATA_PIN = 12;
 const int RECIEVER_PIN = 21;
@@ -20,7 +20,19 @@ int messageRecievedFlag = 0;
 
 
 void setup() {
-  Serial.begin(9600);
+  //carrier signal setup
+  pinMode(5, OUTPUT);
+  Serial.begin(9600);Serial1.begin(1200);
+  TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
+  // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
+  // also sets WGM to mode 15: FastPWM with top set by OCR3A
+  TCCR3B = _BV(WGM32) | _BV(WGM33) | _BV(CS31);
+  // sets WGM as stated above; sets clock scaling to "divide by 8"
+  OCR3A = 39; //approx 25kHz signal
+  // above sets the counter value at which register resets to 0x0000;
+  // generate 20kHz when OCR3A=50, 20.5kHz OCR3A = 48, 21kHz OCR3A = 46
+  // Serial.println(TCCR3A, BIN);Serial.println(TCCR3B, BIN);
+
   
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
@@ -31,6 +43,7 @@ void setup() {
   clearArray(sample_array);
   clearArray(lastMessage);
   
+  
   // enable interrupts
   interrupts();
 }
@@ -38,18 +51,18 @@ void setup() {
 void loop() {
   //delay(SAMPLE_TIME/5);
  
- delay(1000);
+ delay(100);
  
  //int message[4] = {1 0 1 0};
  sendMessage(1);
  
- delay(1000);
+ //delay(20);
  
- sendMessage(2);
+ //sendMessage(2);
  
- delay(1000);
+ //delay(20);
  
- sendMessage(3);
+ //sendMessage(3);
  
   /*if( messageRecievedFlag ) {
     Serial.print("Message recieved: ");
@@ -159,8 +172,8 @@ void setArrays() {
   // 1001
   colissionMsg[0] = 1;
   colissionMsg[1] = 0;
-  colissionMsg[2] = 0;
-  colissionMsg[3] = 1;
+  colissionMsg[2] = 1;
+  colissionMsg[3] = 0;
   
   // 1010
   foundBlueMsg[0] = 1;
