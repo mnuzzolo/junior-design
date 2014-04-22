@@ -33,20 +33,22 @@ void setup() {
 }
 
 void loop() {
-  sendMessage(commRecievedMsg);
-  delay(1000);
-  sendMessage(foundBlueMsg);
-  delay(1000);
-  
+  if( messageRecievedFlag ) {
+    Serial.print("Message recieved: ");
+    Serial.println(messageRecievedFlag);
+    messageRecievedFlag = 0; 
+  }
 }
 
 void getMessage() {
+  //Serial.print("in interrupt: ");
+  //Serial.println(num_interrupts);
   // new message indicator
   if( millis() - lastInterrupt >= 500 ) {  
     num_interrupts = 1;
   }
   // deal with "end of message" indicator 
-  else if( millis() - lastInterrupt >= 150 ) {
+  else if( millis() - lastInterrupt >= 50 ) {
     messageRecievedFlag = num_interrupts;
     num_interrupts = 1;
   }
@@ -83,28 +85,18 @@ void decodeMessage() {
 }
 
 void sendMessage(int message) {
-  digitalWrite(DATA_PIN, LOW);
-  Serial.print("Sending message... ");
-  Serial.println(message);
-  for(int i = 0; i < message; i++) {
+  //Serial.println("Sending message...");
+  if( message == 1 ) {
+    for(int i = 0; i < message; i++) {
       // "1"
-      digitalWrite(DATA_PIN, HIGH);
+      analogWrite(DATA_PIN, HIGH);
       delayMicroseconds(SAMPLE_TIME);
       // "0"
-      digitalWrite(DATA_PIN, LOW);
+      analogWrite(DATA_PIN, LOW);
       delayMicroseconds(SAMPLE_TIME);
+    }
   }
-  
-  for(int i = 0; i < 10; i++) {
-    delayMicroseconds(6 000);
-  }
-  
-  // "1"
-  digitalWrite(DATA_PIN, HIGH);
-  delayMicroseconds(SAMPLE_TIME);
-  // "0"
-  digitalWrite(DATA_PIN, LOW);
-  
+
   // set last messsge
   last_message = message;
 }  
