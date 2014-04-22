@@ -68,6 +68,24 @@ void LED_check() {
 int sweep_find () {
   int found = false;
   
+  // sweep right
+  Serial.println("***SWEEP RIGHT***");
+  for(int j = 0; j < 15; j++)
+  {
+    right(100);
+    stop_motor(0);
+    LED_check();
+    if(on_blue)
+    {
+       Serial.println("***FOUND BLUE***");
+       found = true;
+       stop_motor(0);
+       break; 
+    }  
+  }
+  
+  left(100*10);
+  
   // sweep left
   Serial.println("***SWEEP LEFT***");
   for(int i = 0; i < 15; i++)
@@ -90,7 +108,7 @@ int sweep_find () {
     return true;
   }
   
-  right(100*15);
+  right(100*10);
   
   // sweep right
   Serial.println("***SWEEP RIGHT***");

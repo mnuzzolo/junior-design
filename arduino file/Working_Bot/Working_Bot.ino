@@ -2,7 +2,12 @@ int value = 0;
 int hit = 0;
 int lastInterrupt = 0;
 
+// Globals from colission detection
 int colissionFlag = 0;
+int hit_front = 0;
+int hit_left = 0;
+int hit_right = 0;
+int hit_back = 0;
 
 // GLOBALS from color recognition
 int lastR_read = 1023;
@@ -54,6 +59,8 @@ void setup() {
   pinMode(28, OUTPUT); // blue LED out
   pinMode(30, OUTPUT); // red LED out
 
+  delay(2000);
+
   // get first values for red/blue
   LED_check();
   forward(0);
@@ -62,11 +69,15 @@ void setup() {
 // main loop
 void loop(){
   
+  
   if(colissionFlag) {
-    reverse(300);
-    left(800);
-    stop_motor(0);
-    colissionFlag = 0;
+    if(hit_front) {
+      reverse(300);
+      left(800);
+      stop_motor(0);
+      colissionFlag = false;
+      hit_front = false;
+    }
   }
   
   LED_check();
@@ -76,6 +87,9 @@ void loop(){
      while(on_blue) 
      {
         LED_check();
+        
+        if(colissionFlag)
+          break;
         forward(0); 
      }
      if(lost_blue)
@@ -101,52 +115,8 @@ void loop(){
   
   if(on_red)
   {
-     right(1000); 
      stop_motor(0);
   }
   
 }
-
-void hasColission() {  
-  //Serial.println("in interrupt..."); 
-  
-  int timeSince = millis() - lastInterrupt;
-
-  if(timeSince > 300) {
-    lastInterrupt = millis();
-    if(digitalRead(46) == HIGH) {
-      Serial.println("Front");
-    }
-    else if(digitalRead(47) == HIGH) {
-      Serial.println("Front left");
-    }
-    else if(digitalRead(48) == HIGH) {
-      Serial.println("Left side");
-    }
-    else if(digitalRead(49) == HIGH) {
-      Serial.println("Left back");
-    }
-    else if(digitalRead(50) == HIGH) {
-      Serial.println("Back");
-    }
-    else if(digitalRead(51) == HIGH) {
-      Serial.println("Right back");
-    }
-    else if(digitalRead(52) == HIGH) {
-      Serial.println("Right side");
-    }
-    else if(digitalRead(53) == HIGH) {
-      Serial.println("Front right");
-    }
-    else {
-      Serial.println("What happened..."); 
-    }
-    
-  //reverse(500);
-    colissionFlag++;
-    //stop_motor(0); 
-  }
-}
-
-
 
