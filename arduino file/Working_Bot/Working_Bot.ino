@@ -2,6 +2,31 @@ int value = 0;
 int hit = 0;
 int lastInterrupt = 0;
 
+// Globals for communication
+
+const int SAMPLE_TIME = 4000;
+
+const int DATA_PIN = 12;
+const int RECIEVER_PIN = 18;
+
+// message signals
+int commRecievedMsg = 2;
+int foundBlueMsg = 6;
+int foundRedMsg = 10;
+int invalidMsg = 14;
+
+// store last message
+int last_message = 0;
+
+// store interrupt information (communication)
+int lastMsgInterrupt = 0;
+int num_interrupts = 0;
+
+// flags
+int messageRecievedFlag = 0;
+int communicationFlag = 0;
+
+
 // Globals for motor
 int DUTY_CYCLE = 255;
 
@@ -67,8 +92,18 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(28, OUTPUT); // blue LED out
   pinMode(30, OUTPUT); // red LED out
+  
+  // setup signal LEDs
+  pinMode(32, OUTPUT); // blue
+  pinMode(34, OUTPUT); // red
 
-  delay(2000);
+  digitalWrite(32, HIGH); 
+  delay(1000);
+  digitalWrite(34, HIGH);
+  delay(1000);
+  digitalWrite(32, LOW); 
+  delay(1000);
+  digitalWrite(34, LOW);
   // get first values for red/blue
   LED_check();
   forward(0);
@@ -143,6 +178,18 @@ void loop() {
 
     if(on_blue)
     {
+      /*
+      // sendMessage! 
+      int counter = 0;
+      while( messageRecievedFlag != commRecievedMsg && counter < 10) {
+        sendMessage(foundBlueMsg);
+        delay(500); // wait for response
+        left(25);
+        stop_motor(0);
+      }
+      */
+      digitalWrite(34, HIGH);
+      digitalWrite(32, LOW);
       last_color = "BLUE";
       while(on_blue) 
       {
@@ -177,6 +224,19 @@ void loop() {
 
     if(on_red)
     {
+      /*
+      // sendMessage! 
+      int counter = 0;
+      while( messageRecievedFlag != commRecievedMsg && counter < 10) {
+        sendMessage(foundRedMsg);
+        delay(500); // wait for response
+        left(25);
+        stop_motor(0);
+      }
+      */
+      
+      digitalWrite(34, HIGH);
+      digitalWrite(32, LOW);
       last_color = "RED";
       
       Serial.println("found red");

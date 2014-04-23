@@ -21,22 +21,33 @@ int messageRecievedFlag = 0;
 int communicationFlag = 0;
 
 void setup() {
-  Serial.begin(9600);
+  pinMode(5, OUTPUT);
+  Serial.begin(9600);Serial1.begin(1200);
+  TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
+  // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
+  // also sets WGM to mode 15: FastPWM with top set by OCR3A
+  TCCR3B = _BV(WGM32) | _BV(WGM33) | _BV(CS31);
+  // sets WGM as stated above; sets clock scaling to "divide by 8"
+  OCR3A = 39; //approx 20.5kHz signal
+  // above sets the counter value at which register resets to 0x0000;
+  // generate 20kHz when OCR3A=50, 20.5kHz OCR3A = 48, 21kHz OCR3A = 46
+  // Serial.println(TCCR3A, BIN);Serial.println(TCCR3B, BIN);
+  //Serial.begin(9600);
 
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
   pinMode(2, OUTPUT);
-  attachInterrupt(5, getMessage, RISING);
+  //attachInterrupt(5, getMessage, RISING);
 
   // enable interrupts
   interrupts();
 }
 
 void loop() {
-  sendMessage(commRecievedMsg);
-  delay(1000);
+  //sendMessage(commRecievedMsg);
+  //delay(1000);
   sendMessage(foundBlueMsg);
-  delay(1000);
+  delay(100);
   
 }
 
@@ -83,6 +94,7 @@ void decodeMessage() {
 }
 
 void sendMessage(int message) {
+  noInterrupts();
   digitalWrite(DATA_PIN, LOW);
   Serial.print("Sending message... ");
   Serial.println(message);
@@ -96,7 +108,7 @@ void sendMessage(int message) {
   }
   
   for(int i = 0; i < 10; i++) {
-    delayMicroseconds(6 000);
+    delayMicroseconds(6000);
   }
   
   // "1"
@@ -107,4 +119,5 @@ void sendMessage(int message) {
   
   // set last messsge
   last_message = message;
+  interrupts();
 }  
