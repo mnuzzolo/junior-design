@@ -249,7 +249,9 @@ void loop() {
 
     if(on_blue && color_to_find != "RED") {
       color_to_find = "BLUE";
-      //messageProtocol(foundBlueMsg);
+      stop_motor(0);
+      messageProtocol(foundBlueMsg);
+      forward(0);
 
       digitalWrite(32, HIGH);
       digitalWrite(34, LOW);
@@ -288,7 +290,9 @@ void loop() {
     if(on_red && color_to_find != "BLUE") {
       Serial.println("Found red");
       color_to_find = "RED";
-      //messageProtocol(foundRedMsg);
+      stop_motor(0);
+      messageProtocol(foundRedMsg);
+      forward(0);
 
       digitalWrite(34, HIGH);
       digitalWrite(32, LOW);
