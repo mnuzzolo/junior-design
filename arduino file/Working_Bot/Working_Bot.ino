@@ -119,14 +119,14 @@ void setup() {
   pinMode(34, OUTPUT); // red
 
   digitalWrite(32, HIGH); 
-  delay(1000);
+  //delay(1000);
   digitalWrite(34, HIGH);
-  delay(1000);
+  //delay(1000);
   digitalWrite(32, LOW); 
-  delay(1000);
+  //delay(1000);
   digitalWrite(34, LOW);
   // get first values for red/blue
-  LED_check();
+  //LED_check();
   
   forward(0);
   
@@ -134,7 +134,12 @@ void setup() {
 
 // main loop
 void loop() {
-
+  
+  stop_motor(0);
+  //messageProtocol(foundRedMsg);
+  //delay(5000);
+  //messageProtocol(foundBlueMsg);
+  
   if( messageRecievedFlag ) {
     Serial.print("Message recieved: ");
     Serial.println(messageRecievedFlag);
@@ -151,7 +156,7 @@ void loop() {
     messageRecievedFlag = 0; 
 
   }
-
+  /*
   // FIRST COLISSION 
   if(colissionFlag && !findColorFlag && !finishedTrackFlag) {
     if(hit_front) {
@@ -329,7 +334,7 @@ void loop() {
       }
       
     }
-  }
+  }*/
   
 }
 

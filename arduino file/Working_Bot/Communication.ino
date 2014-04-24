@@ -42,40 +42,62 @@ void decodeMessage() {
 }
 
 void sendMessage(int message) {
-  //Serial.println("Sending message...");
-  if( message == 1 ) {
-    for(int i = 0; i < message; i++) {
+  noInterrupts();
+  digitalWrite(DATA_PIN, LOW);
+  Serial.print("Sending message... ");
+  Serial.println(message);
+  for(int i = 0; i < message; i++) {
       // "1"
-      analogWrite(DATA_PIN, HIGH);
+      digitalWrite(DATA_PIN, HIGH);
       delayMicroseconds(SAMPLE_TIME);
       // "0"
-      analogWrite(DATA_PIN, LOW);
+      digitalWrite(DATA_PIN, LOW);
       delayMicroseconds(SAMPLE_TIME);
-    }
   }
-
+  
+  for(int i = 0; i < 10; i++) {
+    delayMicroseconds(6000);
+  }
+  
+  // "1"
+  digitalWrite(DATA_PIN, HIGH);
+  delayMicroseconds(SAMPLE_TIME);
+  // "0"
+  digitalWrite(DATA_PIN, LOW);
+  
   // set last messsge
   last_message = message;
+  interrupts();
 }  
 
 void messageProtocol(int message) {
   // sendMessage! 
   int counter = 0;
-  while( messageRecievedFlag != commRecievedMsg && counter < 20) {
+  while( messageRecievedFlag != commRecievedMsg) {
     sendMessage(message);
-    delay(500); // wait for response
-    left(50);
-    stop_motor(0);
-    if(messageRecievedFlag) {
-
+    delay(100); // wait for response
+      Serial.println("sending message...");
+    if(!messageRecievedFlag) {
+      left(70);
+      stop_motor(0);
     }
+     
     counter++;
   }
+  
+  if(messageRecievedFlag) {
+     Serial.println("got confirmation!"); 
+  }
+  
+  digitalWrite(32, HIGH);
+  delay(500);
+  digitalWrite(32, LOW);
 
   for(int i = 0; i < counter; i++) {
-    right(50);
+    right(70);
+    stop_motor(0);
   }
-  forward(0);
+  stop_motor(0);
 
 }
 
