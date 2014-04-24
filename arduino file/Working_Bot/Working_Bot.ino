@@ -1,9 +1,4 @@
-int value = 0;
-int hit = 0;
-int lastInterrupt = 0;
-
 // Globals for communication
-
 const int SAMPLE_TIME = 4000;
 
 const int DATA_PIN = 12;
@@ -24,13 +19,15 @@ int num_interrupts = 0;
 
 // flags
 int messageRecievedFlag = 0;
-int communicationFlag = 0;
-
+int findColorFlag = 0;
+int finishedTrackFlag = 0;
 
 // Globals for motor
-int DUTY_CYCLE = 255;
+int DUTY_CYCLE = 125;
 
 // Globals from colission detection
+int lastInterrupt = 0;
+
 int colissionFlag = 0;
 int hit_front = 0;
 int hit_left = 0;
@@ -38,9 +35,9 @@ int hit_right = 0;
 int hit_back = 0;
 
 // GLOBALS from color recognition
-int findColorFlag = 0;
 int LED_blink_time = 20;
 String last_dir_checked = "RIGHT";
+String color_to_find = "NONE";
 
 int lastR_read = 1023;
 int currR_read = 0;
@@ -59,6 +56,27 @@ int lost_red = false;
 String last_color = "BLUE";
 
 void setup() {
+  // setup communication
+  pinMode(5, OUTPUT);
+  Serial.begin(9600); // computer communication
+  Serial1.begin(1200); // carrier signal
+  TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
+  // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
+  // also sets WGM to mode 15: FastPWM with top set by OCR3A
+  TCCR3B = _BV(WGM32) | _BV(WGM33) | _BV(CS31);
+  // sets WGM as stated above; sets clock scaling to "divide by 8"
+  OCR3A = 39; //approx 25kHz signal
+  // above sets the counter value at which register resets to 0x0000;
+  // generate 20kHz when OCR3A=50, 20.5kHz OCR3A = 48, 21kHz OCR3A = 46
+  // Serial.println(TCCR3A, BIN);Serial.println(TCCR3B, BIN);
+
+  pinMode(DATA_PIN, OUTPUT); // data pin
+  pinMode(RECIEVER_PIN, INPUT);
+  attachInterrupt(5, getMessage, RISING);
+
+  // enable interrupts
+  interrupts();
+
   Serial.begin(9600);
   // setup LEDs
   pinMode(2, OUTPUT);
@@ -92,7 +110,7 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(28, OUTPUT); // blue LED out
   pinMode(30, OUTPUT); // red LED out
-  
+
   // setup signal LEDs
   pinMode(32, OUTPUT); // blue
   pinMode(34, OUTPUT); // red
@@ -106,14 +124,29 @@ void setup() {
   digitalWrite(34, LOW);
   // get first values for red/blue
   LED_check();
-  forward(0);
-  Serial.println("go!");
 }
 
 // main loop
 void loop() {
 
-  if(colissionFlag && !findColorFlag) {
+  if( messageRecievedFlag ) {
+    Serial.print("Message recieved: ");
+    Serial.println(messageRecievedFlag);
+
+    if( messageRecievedFlag == foundRedMsg ) {
+      color_to_find = "BLUE";
+      forward(0);
+    }
+    else if( messageRecievedFlag == foundBlueMsg ) {
+      color_to_find = "RED";
+      forward(0);
+    }
+
+    messageRecievedFlag = 0; 
+
+  }
+
+  if(colissionFlag && !findColorFlag && !finishedTrackFlag) {
     if(hit_front) {
       Serial.println("hit front");
       stop_motor(50);
@@ -157,7 +190,8 @@ void loop() {
       //stop_motor(0);
     }
   }
-  else if(colissionFlag) {
+  else if(colissionFlag && !finishedTrackFlag) {
+    if(hit_front) {
       Serial.println("doing a 180");
       stop_motor(50);
       reverse(450);
@@ -168,7 +202,37 @@ void loop() {
       }
       forward(0);
       colissionFlag = false;
+    }
+    else if(hit_left) {
+      Serial.print("hit left");
+      stop_motor(50);
+      reverse(450);
+      right(600);
+      forward(0);
+      findColorFlag = true;
+      colissionFlag = false;
+      hit_left = false;
+      last_dir_checked = "RIGHT";
+    }    
+    else if(hit_right) {
+      Serial.println("hit right");
+      stop_motor(50);
+      reverse(450);
+      left(600);
+      forward(0);
+      findColorFlag = true;
+      colissionFlag = false;
+      hit_right = false;
+      last_dir_checked = "LEFT";
+    }
+    else if (hit_back) {
+      //forward(150);
+      colissionFlag = false;
+      hit_back = false;
+      //stop_motor(0);
+    }
   }
+  
 
   LED_check();
 
@@ -176,9 +240,9 @@ void loop() {
 
     LED_check();
 
-    if(on_blue)
+    if(on_blue && color_to_find != "RED")
     {
-      /*
+      color_to_find = "BLUE";
       // sendMessage! 
       int counter = 0;
       while( messageRecievedFlag != commRecievedMsg && counter < 10) {
@@ -187,12 +251,12 @@ void loop() {
         left(25);
         stop_motor(0);
       }
-      */
+
       digitalWrite(34, HIGH);
       digitalWrite(32, LOW);
       last_color = "BLUE";
-      while(on_blue) 
-      {
+      
+      while(on_blue) {
         LED_check();
 
         if(colissionFlag)
@@ -200,8 +264,7 @@ void loop() {
 
         forward(0); 
       }
-      if(lost_blue)
-      {
+      if(lost_blue) {
         LED_check();
         delay(50);
         reverse(50);
@@ -209,8 +272,7 @@ void loop() {
 
         delay(250);
 
-        if(sweep_find_blue() == true)
-        {
+        if(sweep_find_blue() == true) {
           Serial.println("***SUCCESSFUL SWEEP***");
           lost_blue = false;
           start_motor();
@@ -218,13 +280,14 @@ void loop() {
         else {
           stop_motor(0);
           findColorFlag = false;
+          finishedTrackFlag = true;
         }          
       }
     }
 
-    if(on_red)
+    if(on_red && color_to_find != "BLUE")
     {
-      /*
+      color_to_find = "RED";
       // sendMessage! 
       int counter = 0;
       while( messageRecievedFlag != commRecievedMsg && counter < 10) {
@@ -232,18 +295,47 @@ void loop() {
         delay(500); // wait for response
         left(25);
         stop_motor(0);
+        if(messageRecievedFlag) {
+          decodeMessage();
+        }
       }
-      */
-      
+
       digitalWrite(34, HIGH);
       digitalWrite(32, LOW);
       last_color = "RED";
+
+      // found blue
+      while(on_red) {
+        LED_check();
+
+        if(colissionFlag)
+          break;
+
+        forward(0); 
+      }
+      if(lost_red) {
+        LED_check();
+        delay(50);
+        reverse(50);
+        stop_motor(0);
+
+        delay(250);
+
+        if(sweep_find_red() == true) {
+          Serial.println("***SUCCESSFUL SWEEP***");
+          lost_blue = false;
+          start_motor();
+        }
+        else {
+          stop_motor(0);
+          findColorFlag = false;
+          finishedTrackFlag = true;
+        }          
+      }
       
-      Serial.println("found red");
-      stop_motor(0);
-      //forward(0);
     }
   }
 }
+
 
 

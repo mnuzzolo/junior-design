@@ -47,8 +47,11 @@ void loop() {
   //sendMessage(commRecievedMsg);
   //delay(1000);
   sendMessage(foundBlueMsg);
-  delay(100);
-  
+  delay(1000);
+  sendMessage(foundRedMsg);
+  delay(1000);
+  sendMessage(invalidMsg);
+  delay(1000);
 }
 
 void getMessage() {
