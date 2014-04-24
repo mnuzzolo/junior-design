@@ -46,6 +46,16 @@ void LED_check() {
     lost_red = false;
     lost_blue = false;
   }
+  // check if red is lost
+  else if(on_red && red_change < -50)
+  {
+    last_color = "RED";
+    Serial.println("***LOST RED***");
+    on_red = false;
+    on_blue = false;
+    lost_blue = false;
+    lost_red = true;
+  }
   // check if blue is lost
   else if(on_blue && blue_change < -100)
   {
@@ -55,16 +65,6 @@ void LED_check() {
     on_red = false;
     lost_blue = true;
     lost_red = false;
-  }
-  // check if red is lost
-  else if(on_red && red_change < -60)
-  {
-    last_color = "RED";
-    Serial.println("***LOST RED***");
-    on_red = false;
-    on_blue = false;
-    lost_blue = false;
-    lost_red = true;
   }
 }
 
@@ -129,7 +129,7 @@ int sweep_right_blue() {
 
   if(found)
   {
-    right(75);
+    right(70);
     return true;
   }
   else {
@@ -163,7 +163,7 @@ int sweep_left_blue() {
 
   if(found)
   {
-    left(75);
+    left(70);
     return true;
   }
   else {
@@ -229,7 +229,7 @@ int sweep_right_red() {
 
   if(found)
   {
-    right(75);
+    right(70);
     return true;
   }
   else {
@@ -259,7 +259,7 @@ int sweep_left_red() {
 
   if(found)
   {
-    left(75);
+    left(70);
     return true;
   }
   else {  
