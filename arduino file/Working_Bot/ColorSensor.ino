@@ -5,15 +5,15 @@ void LED_check() {
   digitalWrite(30, LOW);
   delay(LED_blink_time);
   currB_read = analogRead(A0);
-  //Serial.print("BLUE: ");
-  //Serial.println(currB_read);
+  Serial.print("BLUE: ");
+  Serial.println(currB_read);
   delay(LED_blink_time);
   digitalWrite(28, LOW);
   digitalWrite(30, HIGH);
   delay(LED_blink_time);
   currR_read = analogRead(A0);
-  //Serial.print("RED: ");
-  //Serial.println(currR_read);
+  Serial.print("RED: ");
+  Serial.println(currR_read);
   delay(LED_blink_time);
 
   // calculate change in readings
@@ -36,7 +36,7 @@ void LED_check() {
     lost_red = false;
   }
   // check if red is found
-  else if(red_change > 100 && red_change > blue_change)
+  else if(red_change > 60 && red_change > (blue_change - 25))
   {
     last_color = "RED";
     Serial.println("***FOUND RED***");
@@ -57,7 +57,7 @@ void LED_check() {
     lost_red = false;
   }
   // check if red is lost
-  else if(on_red && red_change < -100)
+  else if(on_red && red_change < -60)
   {
     last_color = "RED";
     Serial.println("***LOST RED***");
@@ -108,9 +108,9 @@ int sweep_right_blue() {
   int found = false;
 
   Serial.println("***SWEEP RIGHT***");
-  for(int j = 0; j < 6; j++)
+  for(int j = 0; j < NUM_SWEEPS; j++)
   {
-    right(100);
+    right(SWEEP_SIZE);
 
     stop_motor(0);
 
@@ -142,9 +142,9 @@ int sweep_left_blue() {
   int found = false;
 
   Serial.println("***SWEEP LEFT***");
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < NUM_SWEEPS; i++)
   {
-    left(100);
+    left(SWEEP_SIZE);
 
     if(colissionFlag)
       break;
@@ -166,8 +166,10 @@ int sweep_left_blue() {
     left(75);
     return true;
   }
-
-  right(100*3);
+  else {
+    right(100*3);
+    return false;
+  }
 }
 
 // sweep find for red path
@@ -211,9 +213,9 @@ int sweep_right_red() {
   int found = false;
 
   Serial.println("***SWEEP RIGHT***");
-  for(int j = 0; j < 6; j++)
+  for(int j = 0; j < NUM_SWEEPS; j++)
   {
-    right(100);
+    right(SWEEP_SIZE);
     stop_motor(0);
     LED_check();
     if(on_red)
@@ -240,9 +242,9 @@ int sweep_left_red() {
   int found = false;
 
   Serial.println("***SWEEP LEFT***");
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < NUM_SWEEPS; i++)
   {
-    left(100);
+    left(SWEEP_SIZE);
     stop_motor(0);
     LED_check();
 
@@ -260,24 +262,10 @@ int sweep_left_red() {
     left(75);
     return true;
   }
-
-  right(100*3);
+  else {  
+    right(100*3);
+    return false;
+  }
 }
-
-void start_motor() {
-  // turn on motor
-  digitalWrite(6, HIGH); //enable driver 1 on
-  digitalWrite(9, HIGH); //enable driver 2 on
-  digitalWrite(4, HIGH); 
-  digitalWrite(5, LOW);
-  digitalWrite(7, HIGH); 
-  digitalWrite(8, LOW);  
-}
-
-void turn_off() {
-  digitalWrite(6, LOW);//disable driver 1 
-  digitalWrite(9, LOW);//disable driver 2
-}
-
 
 

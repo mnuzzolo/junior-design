@@ -23,7 +23,7 @@ int findColorFlag = 0;
 int finishedTrackFlag = 0;
 
 // Globals for motor
-int DUTY_CYCLE = 125;
+int DUTY_CYCLE = 155;
 
 // Globals from colission detection
 int lastInterrupt = 0;
@@ -38,6 +38,9 @@ int hit_back = 0;
 int LED_blink_time = 20;
 String last_dir_checked = "RIGHT";
 String color_to_find = "NONE";
+
+int NUM_SWEEPS = 6;
+int SWEEP_SIZE = 138;
 
 int lastR_read = 1023;
 int currR_read = 0;
@@ -85,10 +88,10 @@ void setup() {
   // setup motor
   pinMode(4, OUTPUT); //hBridge pin 2
   pinMode(10, OUTPUT);//hbridge pin 7
-  pinMode(A2, OUTPUT); // h bridge enable 1 (pin1)
+  pinMode(6, OUTPUT); // h bridge enable 1 (pin 1)
   pinMode(7, OUTPUT); //hBridge pin 15
   pinMode(8, OUTPUT); //hbridge pin 10
-  pinMode(A3, OUTPUT); // h bridge enable 2 (pin 9)
+  pinMode(9, OUTPUT); // h bridge enable 2 (pin 9)
 
   pinMode(21, INPUT);
   attachInterrupt(2, hasColission, RISING);
@@ -124,6 +127,9 @@ void setup() {
   digitalWrite(34, LOW);
   // get first values for red/blue
   LED_check();
+  
+  forward(0);
+  
 }
 
 // main loop
@@ -146,15 +152,16 @@ void loop() {
 
   }
 
+  // FIRST COLISSION 
   if(colissionFlag && !findColorFlag && !finishedTrackFlag) {
     if(hit_front) {
       Serial.println("hit front");
       stop_motor(50);
-      reverse(450);
+      reverse(500);
       if(last_color == "RED")
-        left(1100);
+        left(1000);
       else {
-        right(1100);
+        right(1000);
       }
       forward(0);
       findColorFlag = true;
@@ -164,7 +171,7 @@ void loop() {
     else if(hit_left) {
       Serial.print("hit left");
       stop_motor(50);
-      reverse(450);
+      reverse(500);
       right(900);
       forward(0);
       findColorFlag = true;
@@ -175,7 +182,7 @@ void loop() {
     else if(hit_right) {
       Serial.println("hit right");
       stop_motor(50);
-      reverse(450);
+      reverse(500);
       left(900);
       forward(0);
       findColorFlag = true;
@@ -190,15 +197,16 @@ void loop() {
       //stop_motor(0);
     }
   }
+  // SECOND AND OTHER COLISSIONS
   else if(colissionFlag && !finishedTrackFlag) {
     if(hit_front) {
       Serial.println("doing a 180");
       stop_motor(50);
-      reverse(450);
+      reverse(500);
       if(last_color == "RED")
-        left(1100);
-      else {
         right(1100);
+      else {
+        left(1100);
       }
       forward(0);
       colissionFlag = false;
@@ -206,8 +214,8 @@ void loop() {
     else if(hit_left) {
       Serial.print("hit left");
       stop_motor(50);
-      reverse(450);
-      right(600);
+      reverse(500);
+      right(1000);
       forward(0);
       findColorFlag = true;
       colissionFlag = false;
@@ -217,8 +225,8 @@ void loop() {
     else if(hit_right) {
       Serial.println("hit right");
       stop_motor(50);
-      reverse(450);
-      left(600);
+      reverse(500);
+      left(1000);
       forward(0);
       findColorFlag = true;
       colissionFlag = false;
@@ -233,27 +241,18 @@ void loop() {
     }
   }
   
-
   LED_check();
 
   if(findColorFlag) {
 
     LED_check();
 
-    if(on_blue && color_to_find != "RED")
-    {
+    if(on_blue && color_to_find != "RED") {
       color_to_find = "BLUE";
-      // sendMessage! 
-      int counter = 0;
-      while( messageRecievedFlag != commRecievedMsg && counter < 10) {
-        sendMessage(foundBlueMsg);
-        delay(500); // wait for response
-        left(25);
-        stop_motor(0);
-      }
+      //messageProtocol(foundBlueMsg);
 
-      digitalWrite(34, HIGH);
-      digitalWrite(32, LOW);
+      digitalWrite(32, HIGH);
+      digitalWrite(34, LOW);
       last_color = "BLUE";
       
       while(on_blue) {
@@ -275,9 +274,10 @@ void loop() {
         if(sweep_find_blue() == true) {
           Serial.println("***SUCCESSFUL SWEEP***");
           lost_blue = false;
-          start_motor();
+          forward(0);
         }
         else {
+          reverse(200);
           stop_motor(0);
           findColorFlag = false;
           finishedTrackFlag = true;
@@ -285,20 +285,10 @@ void loop() {
       }
     }
 
-    if(on_red && color_to_find != "BLUE")
-    {
+    if(on_red && color_to_find != "BLUE") {
+      Serial.println("Found red");
       color_to_find = "RED";
-      // sendMessage! 
-      int counter = 0;
-      while( messageRecievedFlag != commRecievedMsg && counter < 10) {
-        sendMessage(foundRedMsg);
-        delay(500); // wait for response
-        left(25);
-        stop_motor(0);
-        if(messageRecievedFlag) {
-          decodeMessage();
-        }
-      }
+      //messageProtocol(foundRedMsg);
 
       digitalWrite(34, HIGH);
       digitalWrite(32, LOW);
@@ -324,9 +314,10 @@ void loop() {
         if(sweep_find_red() == true) {
           Serial.println("***SUCCESSFUL SWEEP***");
           lost_blue = false;
-          start_motor();
+          forward(0);
         }
         else {
+          reverse(200);
           stop_motor(0);
           findColorFlag = false;
           finishedTrackFlag = true;
@@ -335,6 +326,7 @@ void loop() {
       
     }
   }
+  
 }
 
 

@@ -57,3 +57,25 @@ void sendMessage(int message) {
   // set last messsge
   last_message = message;
 }  
+
+void messageProtocol(int message) {
+  // sendMessage! 
+  int counter = 0;
+  while( messageRecievedFlag != commRecievedMsg && counter < 20) {
+    sendMessage(message);
+    delay(500); // wait for response
+    left(50);
+    stop_motor(0);
+    if(messageRecievedFlag) {
+
+    }
+    counter++;
+  }
+
+  for(int i = 0; i < counter; i++) {
+    right(50);
+  }
+  forward(0);
+
+}
+
