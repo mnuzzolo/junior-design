@@ -2,7 +2,7 @@
 const int SAMPLE_TIME = 4000;
 
 const int DATA_PIN = 12;
-const int RECIEVER_PIN = 18;
+const int RECIEVER_PIN = 19;
 
 // message signals
 int commRecievedMsg = 2;
@@ -75,7 +75,7 @@ void setup() {
 
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
-  attachInterrupt(5, getMessage, RISING);
+  attachInterrupt(4, getMessage, RISING);
 
   // enable interrupts
   interrupts();
@@ -135,7 +135,7 @@ void setup() {
 // main loop
 void loop() {
   
-  stop_motor(0);
+  //stop_motor(0);
   //messageProtocol(foundRedMsg);
   //delay(5000);
   //messageProtocol(foundBlueMsg);
