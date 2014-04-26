@@ -10,8 +10,8 @@ void getMessage() {
     messageRecievedFlag = num_interrupts;
     num_interrupts = 1;
   }
-  // increment counter
-  else {
+  // increment counters
+  else if( millis() - lastMsgInterrupt >= 3) {
     num_interrupts++;
   }
   lastMsgInterrupt = millis();
@@ -56,7 +56,7 @@ void sendMessage(int message) {
   }
   
   for(int i = 0; i < 10; i++) {
-    delayMicroseconds(6000);
+    delayMicroseconds(5500);
   }
   
   // "1"
@@ -73,20 +73,24 @@ void sendMessage(int message) {
 void messageProtocol(int message) {
   // sendMessage! 
   int counter = 0;
-  while( messageRecievedFlag != commRecievedMsg) {
+  while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) ) {
     sendMessage(message);
-    delay(100); // wait for response
-      Serial.println("sending message...");
+    delay(1000); // wait for response
     if(!messageRecievedFlag) {
       left(70);
       stop_motor(0);
+    }
+    else if (messageRecievedFlag > 1) {
+      Serial.print("message is: "); 
+      Serial.println(messageRecievedFlag);
     }
      
     counter++;
   }
   
   if(messageRecievedFlag) {
-     Serial.println("got confirmation!"); 
+     Serial.print("got confirmation! with "); 
+     Serial.println(messageRecievedFlag);
   }
   
   digitalWrite(32, HIGH);

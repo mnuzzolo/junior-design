@@ -2,13 +2,13 @@
 const int SAMPLE_TIME = 4000;
 
 const int DATA_PIN = 12;
-const int RECIEVER_PIN = 19;
+const int RECIEVER_PIN = 20;
 
 // message signals
-int commRecievedMsg = 2;
-int foundBlueMsg = 6;
-int foundRedMsg = 10;
-int invalidMsg = 14;
+int commRecievedMsg = 10;
+int foundBlueMsg = 20;
+int foundRedMsg = 30;
+int invalidMsg = 40;
 
 // store last message
 int last_message = 0;
@@ -75,7 +75,7 @@ void setup() {
 
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
-  attachInterrupt(4, getMessage, RISING);
+  attachInterrupt(3, getMessage, RISING);
 
   // enable interrupts
   interrupts();
@@ -117,7 +117,7 @@ void setup() {
   // setup signal LEDs
   pinMode(32, OUTPUT); // blue
   pinMode(34, OUTPUT); // red
-
+  /*
   digitalWrite(32, HIGH); 
   delay(1000);
   digitalWrite(34, HIGH);
@@ -126,7 +126,7 @@ void setup() {
   delay(1000);
   digitalWrite(34, LOW);
   // get first values for red/blue
-  LED_check();
+  LED_check();*/
   
   forward(0);
   
@@ -135,12 +135,15 @@ void setup() {
 // main loop
 void loop() {
   
-  //stop_motor(0);
-  //messageProtocol(foundRedMsg);
-  //delay(5000);
+  stop_motor(0);
+  messageProtocol(foundRedMsg);
+  delay(5000);
   //messageProtocol(foundBlueMsg);
+  //delay(5000);
+  //messageRecievedFlag = 0;
   
   if( messageRecievedFlag ) {
+    digitalWrite(32, HIGH);
     Serial.print("Message recieved: ");
     Serial.println(messageRecievedFlag);
 
@@ -156,7 +159,7 @@ void loop() {
     messageRecievedFlag = 0; 
 
   }
-  
+  /*
   // FIRST COLISSION 
   if(colissionFlag && !findColorFlag && !finishedTrackFlag) {
     if(hit_front) {
@@ -335,7 +338,7 @@ void loop() {
       
     }
   }
-  
+  */
 }
 
 
