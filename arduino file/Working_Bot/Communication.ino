@@ -25,7 +25,9 @@ void decodeMessage() {
   else if( messageRecievedFlag == foundBlueMsg ) {
     // set blue found flag
     color_to_find = "RED";
-    sendMessage(commRecievedMsg);  
+    sendMessage(commRecievedMsg); 
+    delay(500);
+    sendMessage(commRecievedMsg);   
   } 
   else if( messageRecievedFlag == foundRedMsg ) {
     // set red found flag
@@ -47,24 +49,24 @@ void sendMessage(int message) {
   Serial.print("Sending message... ");
   Serial.println(message);
   for(int i = 0; i < message; i++) {
-      // "1"
-      digitalWrite(DATA_PIN, HIGH);
-      delayMicroseconds(SAMPLE_TIME);
-      // "0"
-      digitalWrite(DATA_PIN, LOW);
-      delayMicroseconds(SAMPLE_TIME);
+    // "1"
+    digitalWrite(DATA_PIN, HIGH);
+    delayMicroseconds(SAMPLE_TIME);
+    // "0"
+    digitalWrite(DATA_PIN, LOW);
+    delayMicroseconds(SAMPLE_TIME);
   }
-  
+
   for(int i = 0; i < 10; i++) {
     delayMicroseconds(5500);
   }
-  
+
   // "1"
   digitalWrite(DATA_PIN, HIGH);
   delayMicroseconds(SAMPLE_TIME);
   // "0"
   digitalWrite(DATA_PIN, LOW);
-  
+
   // set last messsge
   last_message = message;
   interrupts();
@@ -74,34 +76,36 @@ void messageProtocol(int message) {
   // sendMessage! 
   int counter = 0;
   while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) ) {
+    delay(25);
     sendMessage(message);
     delay(1000); // wait for response
     if(!messageRecievedFlag) {
-      left(70);
+      left(COMM_TURN_AMT);
       stop_motor(0);
     }
     else if (messageRecievedFlag > 1) {
       Serial.print("message is: "); 
       Serial.println(messageRecievedFlag);
     }
-     
+
     counter++;
   }
-  
+
   if(messageRecievedFlag) {
-     Serial.print("got confirmation! with "); 
-     Serial.println(messageRecievedFlag);
+    Serial.print("got confirmation! with "); 
+    Serial.println(messageRecievedFlag);
   }
-  
+
   digitalWrite(32, HIGH);
   delay(500);
   digitalWrite(32, LOW);
 
   for(int i = 0; i < counter; i++) {
-    right(70);
+    right(COMM_TURN_AMT);
     stop_motor(0);
   }
   stop_motor(0);
 
 }
+
 

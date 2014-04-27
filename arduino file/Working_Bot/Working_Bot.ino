@@ -2,13 +2,15 @@
 const int SAMPLE_TIME = 4000;
 
 const int DATA_PIN = 12;
-const int RECIEVER_PIN = 20;
+const int RECIEVER_PIN = 19;
+
+int COMM_TURN_AMT = 50;
 
 // message signals
 int commRecievedMsg = 10;
 int foundBlueMsg = 20;
-int foundRedMsg = 30;
-int invalidMsg = 40;
+int invalidMsg = 30;
+int foundRedMsg = 40;
 
 // store last message
 int last_message = 0;
@@ -75,7 +77,7 @@ void setup() {
 
   pinMode(DATA_PIN, OUTPUT); // data pin
   pinMode(RECIEVER_PIN, INPUT);
-  attachInterrupt(3, getMessage, RISING);
+  attachInterrupt(4, getMessage, RISING);
 
   // enable interrupts
   interrupts();
@@ -117,47 +119,59 @@ void setup() {
   // setup signal LEDs
   pinMode(32, OUTPUT); // blue
   pinMode(34, OUTPUT); // red
-  /*
+  
   digitalWrite(32, HIGH); 
-  delay(1000);
+  delay(500);
   digitalWrite(34, HIGH);
-  delay(1000);
+  delay(500);
   digitalWrite(32, LOW); 
-  delay(1000);
+  delay(500);
   digitalWrite(34, LOW);
   // get first values for red/blue
-  LED_check();*/
+  LED_check();
   
-  forward(0);
+  //forward(0);
   
 }
 
 // main loop
 void loop() {
   
-  stop_motor(0);
   messageProtocol(foundRedMsg);
   delay(5000);
-  //messageProtocol(foundBlueMsg);
-  //delay(5000);
-  //messageRecievedFlag = 0;
   
   if( messageRecievedFlag ) {
+    stop_motor(0);
+    
     digitalWrite(32, HIGH);
+    digitalWrite(34, HIGH);
     Serial.print("Message recieved: ");
     Serial.println(messageRecievedFlag);
 
-    if( messageRecievedFlag == foundRedMsg ) {
+    if( abs(messageRecievedFlag - foundRedMsg) <= 5 ) {
       color_to_find = "BLUE";
       forward(0);
+      
+      for(int i = 0; i < 5; i++) {
+        sendMessage(commRecievedMsg);
+        delay(600);
+      }
     }
-    else if( messageRecievedFlag == foundBlueMsg ) {
+    else if( abs(messageRecievedFlag - foundBlueMsg) <= 5 ) {
       color_to_find = "RED";
       forward(0);
+      
+      for(int i = 0; i < 5; i++) {
+        sendMessage(commRecievedMsg);
+        delay(600);
+      }
     }
 
     messageRecievedFlag = 0; 
-
+    
+    delay(1000);
+    digitalWrite(32, LOW);
+    digitalWrite(34, LOW);
   }
   /*
   // FIRST COLISSION 
