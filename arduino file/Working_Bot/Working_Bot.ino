@@ -111,6 +111,12 @@ void setup() {
   //setup collision sensor (debugging)
   pinMode(A8, INPUT);
 
+  // pins to 5V 
+  pinMode(38, OUTPUT);
+  pinMode(39, OUTPUT);
+  digitalWrite(38, HIGH);
+  digitalWrite(39, HIGH);
+
   // setup sensor
   pinMode(A0, INPUT);
   pinMode(28, OUTPUT); // blue LED out

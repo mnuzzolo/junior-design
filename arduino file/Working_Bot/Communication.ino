@@ -45,6 +45,7 @@ void decodeMessage() {
 
 void sendMessage(int message) {
   noInterrupts();
+  digitalWrite(32, HIGH);
   digitalWrite(DATA_PIN, LOW);
   Serial.print("Sending message... ");
   Serial.println(message);
@@ -60,6 +61,8 @@ void sendMessage(int message) {
   for(int i = 0; i < 10; i++) {
     delayMicroseconds(5500);
   }
+  
+  digitalWrite(32, LOW);
 
   // "1"
   digitalWrite(DATA_PIN, HIGH);
