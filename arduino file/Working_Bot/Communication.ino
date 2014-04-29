@@ -89,6 +89,9 @@ void messageProtocol(int message) {
       else if(message==foundBlueMsg) {
         left(COMM_TURN_AMT);
       }
+      else {
+        left(COMM_TURN_AMT); 
+      }
       stop_motor(0);
     }
     else if (messageRecievedFlag > 1) {
