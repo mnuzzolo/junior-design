@@ -119,7 +119,7 @@ int sweep_right_blue() {
     stop_motor(0);
 
     if(colissionFlag)
-      break;
+      //break;
 
     LED_check();
     if(on_blue)
@@ -151,7 +151,7 @@ int sweep_left_blue() {
     left(SWEEP_SIZE);
 
     if(colissionFlag)
-      break;
+      //break;
 
     stop_motor(0);
     LED_check();

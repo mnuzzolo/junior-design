@@ -7,7 +7,7 @@ const int RECIEVER_PIN = 19;
 int COMM_TURN_AMT = 75;
 int OVER_TURN_AMT = 90;
 
-int leader = false;
+int leader = true;
 
 // message signals
 int commRecievedMsg = 10;
@@ -166,6 +166,7 @@ void loop() {
         sendMessage(commRecievedMsg);
         delay(575);
       }
+      delay(1000);
       // go left
       right(250);
       forward(0);
@@ -179,6 +180,7 @@ void loop() {
         sendMessage(commRecievedMsg);
         delay(575);
       }
+      delay(1000);
       // go right
       left(250);
       forward(0);
@@ -308,7 +310,7 @@ void loop() {
 
       if( !achievedCommFlag) {
         stop_motor(0);
-        messageProtocol(foundBlueMsg);
+        //messageProtocol(foundBlueMsg);
         achievedCommFlag = true;
       }
 
@@ -345,7 +347,7 @@ void loop() {
           findColorFlag = false;
           finishedTrackFlag = true;
           if(!leader) {
-            messageProtocol(finishedTrack);
+            //messageProtocol(finishedTrack);
             finishedDisplay();
             while(1) {
               // stop here
@@ -361,7 +363,7 @@ void loop() {
 
       if( !achievedCommFlag ) {
         stop_motor(0);
-        messageProtocol(foundRedMsg);    
+        //messageProtocol(foundRedMsg);    
         achievedCommFlag = true;
       }
 
@@ -399,7 +401,7 @@ void loop() {
           findColorFlag = false;
           finishedTrackFlag = true;
           if(!leader) {
-            messageProtocol(finishedTrack);
+            //messageProtocol(finishedTrack);
             finishedDisplay();
             while(1) {
               // stop here
