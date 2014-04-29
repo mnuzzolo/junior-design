@@ -4,7 +4,7 @@ void forward(int time){
   digitalWrite(9, HIGH); //enable driver 2 on
   analogWrite(4, DUTY_CYCLE); 
   analogWrite(10, 0);
-  analogWrite(7, DUTY_CYCLE-5); 
+  analogWrite(7, DUTY_CYCLE-10); 
   analogWrite(8, 0);  
   delay(time);
 }

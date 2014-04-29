@@ -1,13 +1,17 @@
 void LED_check() {
 
   // get sensor info
+  // check blue
   digitalWrite(28, HIGH);
+  //if( !(on_lue || lost_blue) )
   digitalWrite(30, LOW);
   delay(LED_blink_time);
   currB_read = analogRead(A0);
   Serial.print("BLUE: ");
   Serial.println(currB_read);
   delay(LED_blink_time);
+  // check red
+  //if( !(onRed || lost_red) )
   digitalWrite(28, LOW);
   digitalWrite(30, HIGH);
   delay(LED_blink_time);
@@ -25,7 +29,7 @@ void LED_check() {
   lastR_read = currR_read;
 
   // set color flags
-  if(blue_change > 100 && blue_change > red_change)
+  if(blue_change > 100 && blue_change > red_change && color_to_find != "RED")
   {
     last_color = "BLUE";
     Serial.println("***FOUND BLUE***");
@@ -36,7 +40,7 @@ void LED_check() {
     lost_red = false;
   }
   // check if red is found
-  else if(red_change > 60 && red_change > (blue_change - 25))
+  else if(red_change > 70 && red_change > (blue_change - 25))
   {
     last_color = "RED";
     Serial.println("***FOUND RED***");
@@ -57,7 +61,7 @@ void LED_check() {
     lost_red = true;
   }
   // check if blue is lost
-  else if(on_blue && blue_change < -100)
+  else if(on_blue && blue_change < -100 && color_to_find != "RED")
   {
     last_color = "BLUE";
     Serial.println("***LOST BLUE***");
@@ -129,7 +133,7 @@ int sweep_right_blue() {
 
   if(found)
   {
-    right(70);
+    right(OVER_TURN_AMT);
     return true;
   }
   else {
@@ -163,7 +167,7 @@ int sweep_left_blue() {
 
   if(found)
   {
-    left(70);
+    left(OVER_TURN_AMT);
     return true;
   }
   else {
@@ -229,7 +233,7 @@ int sweep_right_red() {
 
   if(found)
   {
-    right(70);
+    right(OVER_TURN_AMT);
     return true;
   }
   else {
@@ -259,7 +263,7 @@ int sweep_left_red() {
 
   if(found)
   {
-    left(70);
+    left(OVER_TURN_AMT);
     return true;
   }
   else {  

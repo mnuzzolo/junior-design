@@ -78,12 +78,17 @@ void sendMessage(int message) {
 void messageProtocol(int message) {
   // sendMessage! 
   int counter = 0;
-  while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) && counter < 50 ) {
+  while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) && counter < 20 ) {
     delay(25);
     sendMessage(message);
-    delay(1000); // wait for response
+    delay(700); // wait for response
     if(!messageRecievedFlag) {
-      left(COMM_TURN_AMT);
+      if(message==foundRedMsg) {
+        right(COMM_TURN_AMT); 
+      }
+      else if(message==foundBlueMsg) {
+        left(COMM_TURN_AMT);
+      }
       stop_motor(0);
     }
     else if (messageRecievedFlag > 1) {
@@ -91,24 +96,31 @@ void messageProtocol(int message) {
       Serial.println(messageRecievedFlag);
     }
 
+  if(message != finishedTrack)
     counter++;
   }
 
   if(messageRecievedFlag) {
     digitalWrite(34, HIGH);
     Serial.print("got confirmation!");
+    messageRecievedFlag = 0;
   }
   
   delay(500);
   digitalWrite(34, LOW);
 
-  for(int i = 0; i < counter; i++) {
-    right(COMM_TURN_AMT);
+  for(int i = 0; i < counter/2; i++) {
+    if(message==foundBlueMsg) {
+      right(COMM_TURN_AMT-3);
+    }
+    else {
+      left(COMM_TURN_AMT-3); 
+    }
     stop_motor(0);
-    delay(50);
+    delay(100);
   }
   stop_motor(0);
-
+  
 }
 
 

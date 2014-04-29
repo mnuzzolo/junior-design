@@ -4,13 +4,17 @@ const int SAMPLE_TIME = 4000;
 const int DATA_PIN = 12;
 const int RECIEVER_PIN = 19;
 
-int COMM_TURN_AMT = 45;
+int COMM_TURN_AMT = 75;
+int OVER_TURN_AMT = 90;
+
+int leader = true;
 
 // message signals
 int commRecievedMsg = 10;
 int foundBlueMsg = 20;
 int invalidMsg = 30;
 int foundRedMsg = 40;
+int finishedTrack = 60;
 
 // store last message
 int last_message = 0;
@@ -43,7 +47,7 @@ String last_dir_checked = "RIGHT";
 String color_to_find = "NONE";
 
 int NUM_SWEEPS = 5;
-int SWEEP_SIZE = 140;
+int SWEEP_SIZE = 110;
 
 int lastR_read = 1023;
 int currR_read = 0;
@@ -64,7 +68,7 @@ String last_color = "BLUE";
 void setup() {
   // setup communication
   pinMode(5, OUTPUT);
-  Serial.begin(9600); // computer communication
+  Serial.begin(9575); // computer communication
   Serial1.begin(1200); // carrier signal
   TCCR3A = _BV(COM3A0) | _BV(COM3B0) | _BV(WGM30) | _BV(WGM31);
   // sets COM Output Mode to FastPWM with toggle of OC3A on compare match with OCR3A
@@ -83,7 +87,7 @@ void setup() {
   // enable interrupts
   interrupts();
 
-  Serial.begin(9600);
+  Serial.begin(9575);
   // setup LEDs
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
@@ -137,7 +141,8 @@ void setup() {
   // get first values for red/blue
   LED_check();
   
-  forward(0);
+  if(leader)
+    forward(0);
   
 }
 
@@ -152,25 +157,42 @@ void loop() {
     Serial.print("Message recieved: ");
     Serial.println(messageRecievedFlag);
 
-    if( abs(messageRecievedFlag - foundRedMsg) <= 5 ) {
+    if( (messageRecievedFlag >= (foundRedMsg - 5) && messageRecievedFlag <= (foundRedMsg + 5) ) ) {
       color_to_find = "BLUE";
-        
+      findColorFlag = true;
+      
       for(int i = 0; i < 5; i++) {
         sendMessage(commRecievedMsg);
-        delay(600);
+        delay(575);
       }
-      
+      // go left
+      left(400);
       forward(0);
     }
-    else if( abs(messageRecievedFlag - foundBlueMsg) <= 5 ) {
+    else if( (messageRecievedFlag >= (foundBlueMsg - 5) && messageRecievedFlag <= (foundBlueMsg + 5) ) ) {
       color_to_find = "RED";
+      findColorFlag = true;
       
       for(int i = 0; i < 5; i++) {
         sendMessage(commRecievedMsg);
-        delay(600);
+        delay(575);
       }
-      
+      // go right
+      right(400);
       forward(0);
+    }
+    else if( (messageRecievedFlag >= (finishedTrack - 5) && messageRecievedFlag <= (finishedTrack + 5) ) ) {
+      for(int i = 0; i < 5; i++) {
+        sendMessage(commRecievedMsg);
+        delay(575);
+      }
+      for(int i = 0; i < 20; i++) {
+        digitalWrite(32, HIGH);
+        digitalWrite(34, HIGH);
+        delay(500);
+        digitalWrite(32, LOW);
+        digitalWrite(34, LOW);
+      }
     }
 
     messageRecievedFlag = 0; 
@@ -185,11 +207,11 @@ void loop() {
     if(hit_front) {
       Serial.println("hit front");
       stop_motor(50);
-      reverse(550);
+      reverse(575);
       if(last_color == "RED")
         left(750);
       else {
-        right(950);
+        right(750);
       }
       forward(0);
       findColorFlag = true;
@@ -199,7 +221,7 @@ void loop() {
     else if(hit_left) {
       Serial.print("hit left");
       stop_motor(50);
-      reverse(550);
+      reverse(575);
       right(700);
       forward(0);
       findColorFlag = true;
@@ -210,7 +232,7 @@ void loop() {
     else if(hit_right) {
       Serial.println("hit right");
       stop_motor(50);
-      reverse(550);
+      reverse(575);
       left(700);
       forward(0);
       findColorFlag = true;
@@ -230,20 +252,21 @@ void loop() {
     if(hit_front) {
       Serial.println("doing a 180");
       stop_motor(50);
-      reverse(550);
+      reverse(575);
       if(last_color == "RED")
-        right(1000);
+        right(925);
       else {
-        left(1000);
+        left(925);
       }
       forward(0);
+      findColorFlag = true;
       colissionFlag = false;
     }
     else if(hit_left) {
       Serial.print("hit left");
       stop_motor(50);
-      reverse(550);
-      right(850);
+      reverse(575);
+      right(825);
       forward(0);
       findColorFlag = true;
       colissionFlag = false;
@@ -253,8 +276,8 @@ void loop() {
     else if(hit_right) {
       Serial.println("hit right");
       stop_motor(50);
-      reverse(550);
-      left(850);
+      reverse(575);
+      left(825);
       forward(0);
       findColorFlag = true;
       colissionFlag = false;
@@ -274,16 +297,17 @@ void loop() {
   if(findColorFlag) {
 
     LED_check();
-
+  
     if(on_blue && color_to_find != "RED") {
       color_to_find = "BLUE";
       
       if( !achievedCommFlag) {
         stop_motor(0);
         messageProtocol(foundBlueMsg);
-        forward(0);
         achievedCommFlag = true;
       }
+      
+      forward(0);
 
       digitalWrite(32, HIGH);
       digitalWrite(34, LOW);
@@ -315,6 +339,8 @@ void loop() {
           stop_motor(0);
           findColorFlag = false;
           finishedTrackFlag = true;
+          if(leader)
+            messageProtocol(finishedTrack);
         }          
       }
     }
@@ -322,12 +348,14 @@ void loop() {
     if(on_red && color_to_find != "BLUE") {
       Serial.println("Found red");
       color_to_find = "RED";
+      
       if( !achievedCommFlag ) {
         stop_motor(0);
-        messageProtocol(foundRedMsg);
-        forward(0); 
+        messageProtocol(foundRedMsg);    
         achievedCommFlag = true;
       }
+      
+      forward(0); 
 
       digitalWrite(34, HIGH);
       digitalWrite(32, LOW);
@@ -360,12 +388,35 @@ void loop() {
           stop_motor(0);
           findColorFlag = false;
           finishedTrackFlag = true;
+          if(leader) {
+            messageProtocol(finishedTrack);
+            finishedDisplay();
+          }
         }          
       }
       
     }
   }
   
+}
+
+void finishedDisplay () {
+  for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < 20; i++) {
+      delayMicroseconds(SAMPLE_TIME*2);
+    }
+    for(int i = 0; i < 10; i++) {
+      delayMicroseconds(5500);
+    }
+    delay(575);
+  }
+  for(int i = 0; i < 20; i++) {
+    digitalWrite(32, HIGH);
+    digitalWrite(34, HIGH);
+    delay(500);
+    digitalWrite(32, LOW);
+    digitalWrite(34, LOW);
+  }
 }
 
 

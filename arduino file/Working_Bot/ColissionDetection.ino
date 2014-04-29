@@ -19,7 +19,7 @@ void hasColission() {
     }  
     else if(digitalRead(52) == HIGH) {
       Serial.println("Left side");
-      hit_left = true;
+      hit_back = true;
     }
     else if(digitalRead(51) == HIGH) {
       Serial.println("Left back");
@@ -35,7 +35,7 @@ void hasColission() {
     }
     else if(digitalRead(48) == HIGH) {
       Serial.println("Right side");
-      hit_right = true;
+      hit_back = true;
     }
     else {
       Serial.println("ERR: Unknown colisison."); 
