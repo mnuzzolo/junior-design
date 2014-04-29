@@ -47,8 +47,8 @@ void sendMessage(int message) {
   noInterrupts();
   digitalWrite(32, HIGH);
   digitalWrite(DATA_PIN, LOW);
-  Serial.print("Sending message... ");
-  Serial.println(message);
+  //Serial.print("Sending message... ");
+  //Serial.println(message);
   for(int i = 0; i < message; i++) {
     // "1"
     digitalWrite(DATA_PIN, HIGH);
@@ -78,7 +78,7 @@ void sendMessage(int message) {
 void messageProtocol(int message) {
   // sendMessage! 
   int counter = 0;
-  while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) ) {
+  while( ! (messageRecievedFlag >= (commRecievedMsg - 5) && messageRecievedFlag <= (commRecievedMsg + 5) ) && counter < 50 ) {
     delay(25);
     sendMessage(message);
     delay(1000); // wait for response
@@ -95,17 +95,17 @@ void messageProtocol(int message) {
   }
 
   if(messageRecievedFlag) {
-    Serial.print("got confirmation! with "); 
-    Serial.println(messageRecievedFlag);
+    digitalWrite(34, HIGH);
+    Serial.print("got confirmation!");
   }
-
-  digitalWrite(32, HIGH);
+  
   delay(500);
-  digitalWrite(32, LOW);
+  digitalWrite(34, LOW);
 
   for(int i = 0; i < counter; i++) {
     right(COMM_TURN_AMT);
     stop_motor(0);
+    delay(50);
   }
   stop_motor(0);
 
