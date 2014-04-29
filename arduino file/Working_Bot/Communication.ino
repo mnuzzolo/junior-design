@@ -47,8 +47,8 @@ void sendMessage(int message) {
   noInterrupts();
   digitalWrite(32, HIGH);
   digitalWrite(DATA_PIN, LOW);
-  //Serial.print("Sending message... ");
-  //Serial.println(message);
+  Serial.print("Sending message... ");
+  Serial.println(message);
   for(int i = 0; i < message; i++) {
     // "1"
     digitalWrite(DATA_PIN, HIGH);

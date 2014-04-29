@@ -7,8 +7,8 @@ void LED_check() {
   digitalWrite(30, LOW);
   delay(LED_blink_time);
   currB_read = analogRead(A0);
-  Serial.print("BLUE: ");
-  Serial.println(currB_read);
+  //Serial.print("BLUE: ");
+  //Serial.println(currB_read);
   delay(LED_blink_time);
   // check red
   //if( !(onRed || lost_red) )
@@ -16,8 +16,8 @@ void LED_check() {
   digitalWrite(30, HIGH);
   delay(LED_blink_time);
   currR_read = analogRead(A0);
-  Serial.print("RED: ");
-  Serial.println(currR_read);
+  //Serial.print("RED: ");
+  //Serial.println(currR_read);
   delay(LED_blink_time);
 
   // calculate change in readings

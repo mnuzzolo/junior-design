@@ -167,7 +167,7 @@ void loop() {
         delay(575);
       }
       // go left
-      left(400);
+      right(250);
       forward(0);
     }
     else if( (messageRecievedFlag >= (foundBlueMsg - 5) && messageRecievedFlag <= (foundBlueMsg + 5) ) ) {
@@ -180,7 +180,7 @@ void loop() {
         delay(575);
       }
       // go right
-      right(400);
+      left(250);
       forward(0);
     }
     else if( (messageRecievedFlag >= (finishedTrack - 5) && messageRecievedFlag <= (finishedTrack + 5) ) ) {
