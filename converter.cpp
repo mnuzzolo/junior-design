@@ -1,3 +1,5 @@
+// this file was made to attempt to convert WAV fieles into a readable array for the arduino
+
 #include <list>
 #include <iostream>
 #include <iomanip>
